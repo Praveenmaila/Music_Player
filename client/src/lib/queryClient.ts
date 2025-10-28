@@ -14,9 +14,9 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-function getAuthHeaders(): HeadersInit {
+function getAuthHeaders(): Record<string, string> {
   const token = localStorage.getItem("token");
-  const headers: HeadersInit = {};
+  const headers: Record<string, string> = {};
   
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
@@ -30,7 +30,7 @@ export async function apiRequest<T = any>(
   url: string,
   data?: unknown | undefined,
 ): Promise<T> {
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     ...getAuthHeaders(),
   };
 

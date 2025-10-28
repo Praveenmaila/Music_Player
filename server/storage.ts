@@ -29,7 +29,7 @@ export class MongoStorage implements IStorage {
     const user = await UserModel.findById(id).lean();
     if (!user) return undefined;
     return {
-      id: user._id.toString(),
+      id: (user._id as any).toString(),
       username: user.username,
       password: user.password,
       role: user.role,
@@ -41,7 +41,7 @@ export class MongoStorage implements IStorage {
     const user = await UserModel.findOne({ username }).lean();
     if (!user) return undefined;
     return {
-      id: user._id.toString(),
+      id: (user._id as any).toString(),
       username: user.username,
       password: user.password,
       role: user.role,
@@ -52,7 +52,7 @@ export class MongoStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const user = await UserModel.create(insertUser);
     return {
-      id: user._id.toString(),
+      id: (user._id as any).toString(),
       username: user.username,
       password: user.password,
       role: user.role,
@@ -63,7 +63,7 @@ export class MongoStorage implements IStorage {
   async createSong(song: { title: string; artist: string; filePath: string; duration?: number; uploadedBy: string }): Promise<Song> {
     const newSong = await SongModel.create(song);
     return {
-      id: newSong._id.toString(),
+      id: (newSong._id as any).toString(),
       title: newSong.title,
       artist: newSong.artist,
       filePath: newSong.filePath,
