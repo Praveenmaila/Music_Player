@@ -10,11 +10,15 @@ A beautiful music streaming application built with React, Express, and MongoDB. 
 - ❤️ Like/unlike songs
 - 📱 Responsive design for all devices
 - 🎨 Beautiful, modern UI inspired by Spotify
+- 👤 Role selection during registration (User/Admin)
+- 🔐 Secure authentication with role-based access
 
 ### Admin Features
 - 📤 Upload new songs (MP3 files)
+- 🖼️ Add custom cover images for songs
 - 🗑️ Delete songs from library
 - 👥 User role management
+- 🎭 Role selection at signup and signin
 
 ## Tech Stack
 
@@ -83,7 +87,11 @@ A beautiful music streaming application built with React, Express, and MongoDB. 
 
 ## Creating an Admin User
 
-After registering a regular user, you can manually update the user's role in MongoDB:
+You can now select the "Admin" role directly during registration. Simply choose "Admin" from the role dropdown when creating your account.
+
+**Important:** During login, make sure to select the same role you registered with. The role dropdown validates that you're logging in with the correct role.
+
+Alternatively, you can manually update an existing user's role in MongoDB:
 
 ```javascript
 // In MongoDB shell or Compass
@@ -93,24 +101,26 @@ db.users.updateOne(
 )
 ```
 
-Or use a MongoDB GUI like MongoDB Compass to update the user's role to "admin".
-
 ## Usage
 
 ### As a User
-1. Register a new account or login
-2. Browse the song library
+1. Register a new account by selecting "User" role or login with your credentials
+2. Browse the song library on the home page
 3. Click on a song card to play it
-4. Use the bottom player controls to manage playback
-5. Click the heart icon to like songs
+4. Use the bottom player controls to manage playback (play, pause, next, previous)
+5. Click the heart icon to like/unlike songs
 6. View your liked songs in the "Liked Songs" section
+7. Enjoy seamless music streaming with beautiful UI
 
 ### As an Admin
-1. Login with an admin account
-2. Navigate to the "Upload" section
-3. Fill in song details (title and artist)
-4. Upload an MP3 file
-5. Manage existing songs (delete unwanted tracks)
+1. Register or login with "Admin" role selected
+2. Access all user features plus admin-specific capabilities
+3. Navigate to the "Upload" section from the sidebar
+4. Fill in song details (title and artist)
+5. Upload MP3 files to expand the library
+6. Optionally add custom cover images (JPEG, PNG, GIF, or WebP)
+7. Manage existing songs (delete unwanted tracks)
+8. Monitor and manage user interactions
 
 ## Project Structure
 
@@ -144,8 +154,8 @@ Or use a MongoDB GUI like MongoDB Compass to update the user's role to "admin".
 - `GET /api/songs` - Get all songs
 - `GET /api/songs/liked` - Get user's liked songs
 - `GET /api/songs/:id/stream` - Stream a song (with range support)
-- `POST /api/songs/upload` - Upload a new song (admin only)
-- `DELETE /api/songs/:id` - Delete a song (admin only)
+- `POST /api/songs/upload` - Upload a new song with optional cover image (admin only)
+- `DELETE /api/songs/:id` - Delete a song and its cover (admin only)
 - `POST /api/songs/:id/like` - Toggle like on a song
 
 ## Security Features

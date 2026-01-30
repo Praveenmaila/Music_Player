@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, Music } from "lucide-react";
+import { Upload, Music, Image as ImageIcon } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +30,8 @@ export default function Admin() {
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [songToDelete, setSongToDelete] = useState<string | null>(null);
 
@@ -48,6 +50,9 @@ export default function Admin() {
       formData.append("title", title);
       formData.append("artist", artist);
       formData.append("song", file);
+      if (imageFile) {
+        formData.append("cover", imageFile);
+      }
 
       const response = await fetch("/api/songs/upload", {
         method: "POST",
@@ -73,8 +78,12 @@ export default function Admin() {
       setTitle("");
       setArtist("");
       setFile(null);
-      const fileInput = document.getElementById("song-file") as HTMLInputElement;
-      if (fileInput) fileInput.value = "";
+      setImageFile(null);
+      setImagePreview(null);
+      const songInput = document.getElementById("song-file") as HTMLInputElement;
+      const imageInput = document.getElementById("image-file") as HTMLInputElement;
+      if (songInput) songInput.value = "";
+      if (imageInput) imageInput.value = "";
     },
     onError: (error: Error) => {
       toast({
@@ -116,6 +125,26 @@ export default function Admin() {
     },
   });
 
+  const updateDurationsMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/songs/update-durations", {});
+    },
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/songs"] });
+      toast({
+        title: "Durations Updated",
+        description: `Updated ${data.updated} songs${data.errors > 0 ? `, ${data.errors} errors` : ''}`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "Update failed",
+        description: error.message,
+      });
+    },
+  });
+
   const handleDelete = (songId: string) => {
     setSongToDelete(songId);
     setDeleteDialogOpen(true);
@@ -150,11 +179,17 @@ export default function Admin() {
                 Upload New Song
               </CardTitle>
               <CardDescription>
-                Add a new song to the music library
+                Add a new song with optional cover image
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={(e) => { e.preventDefault(); uploadMutation.mutate(); }} className="space-y-4">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  uploadMutation.mutate();
+                }}
+                className="space-y-4"
+              >
                 <div className="space-y-2">
                   <Label htmlFor="title">Song Title</Label>
                   <Input
@@ -162,10 +197,10 @@ export default function Admin() {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Enter song title"
-                    data-testid="input-song-title"
                     required
                   />
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="artist">Artist Name</Label>
                   <Input
@@ -173,10 +208,10 @@ export default function Admin() {
                     value={artist}
                     onChange={(e) => setArtist(e.target.value)}
                     placeholder="Enter artist name"
-                    data-testid="input-artist-name"
                     required
                   />
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="song-file">MP3 File</Label>
                   <Input
@@ -184,7 +219,6 @@ export default function Admin() {
                     type="file"
                     accept=".mp3,audio/mpeg"
                     onChange={(e) => setFile(e.target.files?.[0] || null)}
-                    data-testid="input-song-file"
                     required
                   />
                   {file && (
@@ -193,11 +227,35 @@ export default function Admin() {
                     </p>
                   )}
                 </div>
-                <Button 
-                  type="submit" 
-                  className="w-full" 
+
+                <div className="space-y-2">
+                  <Label htmlFor="image-file">Cover Image (Optional)</Label>
+                  <Input
+                    id="image-file"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] || null;
+                      setImageFile(file);
+                      setImagePreview(file ? URL.createObjectURL(file) : null);
+                    }}
+                  />
+                  {imagePreview && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="h-16 w-16 rounded object-cover border"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full"
                   disabled={uploadMutation.isPending}
-                  data-testid="button-upload"
                 >
                   {uploadMutation.isPending ? "Uploading..." : "Upload Song"}
                 </Button>
@@ -207,7 +265,16 @@ export default function Admin() {
 
           {/* Song Management */}
           <div>
-            <h2 className="text-2xl font-semibold mb-6">Manage Songs</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-semibold">Manage Songs</h2>
+              <Button
+                variant="outline"
+                onClick={() => updateDurationsMutation.mutate()}
+                disabled={updateDurationsMutation.isPending}
+              >
+                {updateDurationsMutation.isPending ? "Updating..." : "Update All Durations"}
+              </Button>
+            </div>
             {isLoading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="text-center space-y-4">
@@ -241,11 +308,15 @@ export default function Admin() {
           </div>
         </div>
       </div>
-      <AudioPlayer 
-        onToggleLike={() => currentSong && likeMutation.mutate(currentSong.id)}
+
+      <AudioPlayer
+        onToggleLike={() =>
+          currentSong && likeMutation.mutate(currentSong.id)
+        }
         isLiked={currentSong?.isLiked}
       />
 
+      {/* Delete Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -256,10 +327,9 @@ export default function Admin() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel data-testid="button-cancel-delete">Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
               onClick={confirmDelete}
-              data-testid="button-confirm-delete"
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete

@@ -11,6 +11,7 @@ export interface ISong extends Document {
   title: string;
   artist: string;
   filePath: string;
+  coverPath?: string;
   duration: number;
   uploadedBy: mongoose.Types.ObjectId;
   createdAt: Date;
@@ -33,6 +34,7 @@ const songSchema = new Schema<ISong>({
   title: { type: String, required: true },
   artist: { type: String, required: true },
   filePath: { type: String, required: true },
+  coverPath: { type: String },
   duration: { type: Number, default: 0 },
   uploadedBy: { type: Schema.Types.ObjectId, ref: "User" },
   createdAt: { type: Date, default: Date.now },

@@ -7,6 +7,9 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
 import { AudioProvider } from "@/lib/audio-context";
 import { AppSidebar } from "@/components/app-sidebar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
 import Home from "@/pages/home";
 import Liked from "@/pages/liked";
 import Admin from "@/pages/admin";
@@ -36,7 +39,7 @@ function PublicRoute({ component: Component }: { component: () => JSX.Element })
 }
 
 function AppContent() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
   const [location] = useLocation();
   
   const isAuthPage = location === "/login" || location === "/register";
@@ -67,6 +70,27 @@ function AppContent() {
           {isAuthenticated && (
             <header className="flex items-center justify-between p-4 border-b">
               <SidebarTrigger data-testid="button-sidebar-toggle" />
+              <div className="flex items-center gap-3">
+                <Avatar className="h-9 w-9">
+                  <AvatarFallback className="bg-primary text-primary-foreground">
+                    {user?.username.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="hidden sm:block">
+                  <p className="text-sm font-medium">{user?.username}</p>
+                  <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={logout}
+                  data-testid="button-logout-header"
+                  aria-label="Logout"
+                  className="h-9 w-9"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
             </header>
           )}
           <main className="flex-1 overflow-hidden">

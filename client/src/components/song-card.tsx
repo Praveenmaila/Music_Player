@@ -28,7 +28,7 @@ export function SongCard({ song, onPlay, onLike, onDelete, isPlaying, showAdminA
       {/* Album Art with Play Overlay */}
       <div className="relative flex-shrink-0">
         <img 
-          src={placeholderImage}
+          src={song.coverPath ? `/uploads/${song.coverPath}` : placeholderImage}
           alt={song.title}
           className="h-14 w-14 rounded-md object-cover"
         />

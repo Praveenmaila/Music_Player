@@ -33,7 +33,7 @@ export function AudioPlayer({ onToggleLike, isLiked }: AudioPlayerProps) {
         {/* Left: Song Info */}
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <img 
-            src={placeholderImage} 
+            src={currentSong.coverPath ? `/uploads/${currentSong.coverPath}` : placeholderImage} 
             alt={currentSong.title}
             className="h-16 w-16 rounded-md object-cover flex-shrink-0"
           />

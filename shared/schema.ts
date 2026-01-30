@@ -12,6 +12,7 @@ export const insertUserSchema = z.object({
 export const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
   password: z.string().min(1, "Password is required"),
+  role: z.enum(["user", "admin"]).default("user"),
 });
 
 export const insertSongSchema = z.object({
@@ -36,6 +37,7 @@ export interface Song {
   title: string;
   artist: string;
   filePath: string;
+  coverPath?: string;
   duration: number;
   uploadedBy: string;
   createdAt: Date;

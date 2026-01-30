@@ -44,8 +44,31 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     if (!audioRef.current) return;
     
     setCurrentSong(song);
-    audioRef.current.src = `/api/songs/${song.id}/stream`;
-    audioRef.current.play();
+    const token = localStorage.getItem("token");
+    
+    // Create blob URL with authentication
+    fetch(`/api/songs/${song.id}/stream`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    .then(response => response.blob())
+    .then(blob => {
+      const url = URL.createObjectURL(blob);
+      if (audioRef.current) {
+        audioRef.current.src = url;
+        audioRef.current.play();
+        
+        // Clean up the blob URL when we're done with it
+        audioRef.current.onended = () => {
+          URL.revokeObjectURL(url);
+        };
+      }
+    })
+    .catch(error => {
+      console.error('Error loading audio:', error);
+    });
+    
     setIsPlaying(true);
   };
 
